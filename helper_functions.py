@@ -39,8 +39,8 @@ def matobj_to_dict(matobj):
         return matobj
 
 
+# Function estimating TRFs
 def estimate_subjects_trfs(subjects, trf_name, predictor_name):
-
     for subject in subjects:
         print("-" * 50)
         print(f"Processing subject {subject}...")
