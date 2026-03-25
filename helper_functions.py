@@ -1,6 +1,8 @@
 import file_paths
 import re
 import numpy as np
+import eelbrain
+
 
 
 # Utility function to get subject list
@@ -35,3 +37,50 @@ def matobj_to_dict(matobj):
         return [matobj_to_dict(e) for e in matobj]
     else:
         return matobj
+
+
+def estimate_subjects_trfs(subjects, trf_name, predictor_name):
+
+    for subject in subjects:
+        print("-" * 50)
+        print(f"Processing subject {subject}...")
+        
+        # Check if all TRF files already exist
+        trf_dir = file_paths.TRF_DIR / f"{subject}"
+        trf_path = trf_dir / f"{subject}_{trf_name}.pickle"
+        
+        
+        if trf_path.exists():
+            print(f"{trf_name} TRF file for {subject} already exist, skipping.")
+            continue
+        
+        # Load EEG data from pickle file
+        eeg_path = file_paths.EEG_DIR / subject / f"{subject}_eeg.pickle"
+        eeg = eelbrain.load.unpickle(eeg_path)
+
+
+        # Load predictor data
+        predictor_path = file_paths.ENVELOPES_DIR / subject / f"{subject}_{predictor_name}.pickle"
+        predictor = eelbrain.load.unpickle(predictor_path)
+
+        print(f"EEG: {eeg}")
+        print(f"Predictor {predictor_name}: {predictor}")
+
+        # Estimate TRFs for attended and unattended conditions using boosting
+        print(f"Estimating {trf_name} TRF...")
+        trf = eelbrain.boosting(
+                eeg,
+                predictor,
+                -0.100,
+                1.000,
+                error='l1',
+                basis=0.050,
+                partitions=5,
+                test=1, # use cross-validation
+                selective_stopping=True
+            )
+
+        # Save TRF
+        trf_dir.mkdir(exist_ok=True, parents=True)
+        eelbrain.save.pickle(trf, trf_path)
+        print(f"Saved {trf_name} TRF to {trf_path}")
