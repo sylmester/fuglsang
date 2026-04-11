@@ -36,30 +36,58 @@ cocoha/
 
 ---
 
-### 2. **Load the Preprocessed Data and Create Envelopes**
+### 2. **Load and Process Predictors**
 
-Run the notebook `load_data/load-envelopes.ipynb` to load the downloaded preprocessed data and generate attended/unattended envelopes.
+There are two approaches for creating acoustic predictors:
+
+#### Option A: Load Pre-computed Predictors from MAT Files
+
+Run the notebook `load_data/mat_file_predictors.ipynb` to load envelope predictors that are already included in the downloaded `.mat` files.
 
 ```bash
-# Example command to run the notebook
-jupyter notebook load_data/load-envelopes.ipynb
+jupyter notebook load_data/mat_file_predictors.ipynb
 ```
 
 This will:
 
-- Load the `.mat` files from `data_preprocessed/`
-- Generate attended and unattended envelopes
-- Save the results in the `envelopes/` folder
+- Load pre-computed attended (wavA) and ignored (wavB) acoustic envelopes from `data_preprocessed/`
+- Compute edge-detected onsets using Eelbrain's `edge_detector` function
+- Concatenate trials for each subject and attention condition
+- Save results in `predictors/mat_file/` and `predictors/concatenated/mat_file/`
+- **Advantage**: Fast, uses envelopes exactly as provided in the dataset
+- **Predictors**: Envelope, Envelope Onset
+
+#### Option B: Self-Computed Predictors from Audio Stimuli (Currently does not give good results)
+
+Run the notebook `load_data/self-computed-predictors.ipynb` to compute predictors directly from the audio stimuli.
+
+```bash
+jupyter notebook load_data/self-computed-predictors.ipynb
+```
+
+This will:
+
+- Create a 128-band gammatone spectrogram for each audio stimulus (simulating cochlear processing)
+- Derive multiple predictor types from the spectrogram:
+  - Full-band envelope (sum across frequencies)
+  - Full-band envelope onset
+  - 8-band spectrogram (binned across frequency)
+  - 8-band spectrogram onset
+- Match predictors to trials based on attend/ignored condition from `expinfo.csv`
+- Concatenate predictors across trials for each subject and attention condition
+- Save results in `predictors/self_computed/` and `predictors/concatenated/self_computed/`
+- **Advantage**: More detailed frequency/onset analysis, consistent predictor computation
+- **Predictors**: Envelope, Envelope Onset, Spectrogram (8-band), Spectrogram Onset (8-band)
 
 ---
 
 ### 3. **Preprocess EEG Data**
 
-Run the notebook `load_data/load-and-preprocess-eeg.ipynb` to process the EEG data and save it in a ready-to-use format.
+Run the notebook `load_data/load_eeg.ipynb` to process the EEG data and save it in a ready-to-use format.
 
 ```bash
 # Example command to run the notebook
-jupyter notebook load_data/load-and-preprocess-eeg.ipynb
+jupyter notebook load_data/load_eeg.ipynb
 ```
 
 This will:
