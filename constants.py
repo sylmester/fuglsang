@@ -56,6 +56,7 @@ DATA_PREPROC_URL = 'https://zenodo.org/record/1199011/files/DATA_preproc.zip'
 
 DATA_ROOT                   = Path("~").expanduser() / 'Data' / 'cocoha4'
 
+DATA_RAW                    = DATA_ROOT / 'data_raw'
 DATA_PREPROC                = DATA_ROOT / 'data_preprocessed'
 STIMULUS_DIR                = DATA_ROOT / 'stimuli'
 ENVELOPES_DIR               = DATA_ROOT / 'envelopes'

@@ -4,6 +4,9 @@ import numpy as np
 import eelbrain
 import matplotlib.pyplot as plt
 from constants import *
+import os
+import pandas as pd
+
 
 
 
@@ -24,35 +27,36 @@ def get_subject_data_file(subject: str):
 
 
 
-# Utility function to get trial information --------------------------------------------------
-def get_trials():
-    expinfo_table = eelbrain.load.tsv("../expinfo.csv", encoding='utf-8-sig').as_dataframe()
+def get_trials(subject):
+    csv_path = os.path.join(DATA_RAW, f'{subject}_expinfo.csv')
+    
+    if not os.path.exists(csv_path):
+        print(f"Missing expinfo CSV for {subject}: {csv_path}")
+        return {}
 
-    trials = {}
+    expinfo = pd.read_csv(csv_path)
+    trials  = {}
     trial_idx = 0
 
-    for _, row in expinfo_table.iterrows():
+    for _, row in expinfo.iterrows():
         if row['n_speakers'] == 1:
             continue
 
         if row['attend_mf'] == 1:
             attended_wavfile = Path(row['wavfile_male']).stem.strip("'\"")
-            ignored_wavfile = Path(row['wavfile_female']).stem.strip("'\"")
+            ignored_wavfile  = Path(row['wavfile_female']).stem.strip("'\"")
         else:
             attended_wavfile = Path(row['wavfile_female']).stem.strip("'\"")
-            ignored_wavfile = Path(row['wavfile_male']).stem.strip("'\"")
+            ignored_wavfile  = Path(row['wavfile_male']).stem.strip("'\"")
 
         trials[trial_idx] = {
             'attended': attended_wavfile,
-            'ignored': ignored_wavfile
+            'ignored':  ignored_wavfile
         }
+        trial_idx += 1
 
-        trial_idx += 1 
-
-    print(f"Loaded {len(trials)} trials")
-
+    print(f"{subject}: loaded {len(trials)} trials")
     return trials
-
 
 
 # Utility function to process predictors --------------------------------------------------
