@@ -65,7 +65,6 @@ DATA_ROOT                   = Path("~").expanduser() / 'Data' / 'cocoha4'
 DATA_RAW                    = DATA_ROOT / 'data_raw'
 DATA_PREPROC                = DATA_ROOT / 'data_preprocessed'
 STIMULUS_DIR                = DATA_ROOT / 'stimuli'
-ENVELOPES_DIR               = DATA_ROOT / 'envelopes'
 EEG_DIR                     = DATA_ROOT / 'eeg'
 TRF_DIR                     = DATA_ROOT / 'TRFs'
 SELF_COMPUTED_TRF_DIR       = TRF_DIR / 'self_computed'
@@ -82,7 +81,6 @@ MAT_FILE_CONCAT_DIR         = CONCAT_DIR / 'mat_file'
 for _dir in [
     DATA_PREPROC,
     STIMULUS_DIR,
-    ENVELOPES_DIR,
     EEG_DIR,
     TRF_DIR,
     FIGURES_DIR,
