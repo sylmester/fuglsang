@@ -60,7 +60,7 @@ def get_trials(subject):
 
 
 # Utility function to process predictors --------------------------------------------------
-def process_predictor(predictor):
+def process_predictor(predictor, padded = True):
     # DATA PROCESSING OF ENVELOPES
     LOW_FREQUENCY = 0.5
     HIGH_FREQUENCY = 20
@@ -68,67 +68,53 @@ def process_predictor(predictor):
     # Resample spectrograms to 64 hz, offset and filter
     x = predictor
     x = x.bin(1/64, dim='time', label='start')
-    #x = eelbrain.pad(x, tstart=-0.100, tstop=x.time.tstop + 1, name='predictor')
+    if padded:
+        x = eelbrain.pad(x, tstart=-PADDING_ONSET, tstop=x.time.tstop + PADDING_OFFSET)
     x = eelbrain.filter_data(x, LOW_FREQUENCY, HIGH_FREQUENCY)
     
     return x
 
 
-def get_trf_model_name(predictors, attention: ATTENTION_TYPE, model: MODEL_TYPE, padded=False):
+def get_predictor_name(predictors, padded=False) -> str:
     """
-    Generate standardized TRF model names.
-
     Format:
-        <model_type>_<trf_type>_<predictor1+predictor2>[ _padded ]
+        <predictor1+predictor2+...>[ _padded ]
 
     Example:
-        backward_attended_envelope+envelope_onset_padded
+        envelope+envelope_onset_padded
     """
-
-    # Ensure predictors is iterable
     if isinstance(predictors, PREDICTOR_TYPE):
         predictors = [predictors]
 
-    # Sort for consistency
     predictors = sorted(predictors, key=lambda p: p.value)
-
-    predictor_names = "+".join(p.value for p in predictors)
-
-    # Build name
-    name = f"{model.value}_{attention.value}_{predictor_names}"
+    name = "+".join(p.value for p in predictors)
 
     if padded:
         name += "_padded"
 
     return name
 
-def get_predictor_name(predictors, attention: ATTENTION_TYPE, padded=False):
-    """
-    Generate standardized predictor names.
 
+def get_attentional_predictor_name(predictors, attention: ATTENTION_TYPE, padded=False) -> str:
+    """
     Format:
-        <attention_type>_<predictor1+predictor2>[ _padded ]
+        <attention_type>_<predictor_combination>
 
     Example:
         attended_envelope+envelope_onset_padded
     """
+    return f"{attention.value}_{get_predictor_name(predictors, padded)}"
 
-    # Ensure predictors is iterable
-    if isinstance(predictors, PREDICTOR_TYPE):
-        predictors = [predictors]
 
-    # Sort for consistency
-    predictors = sorted(predictors, key=lambda p: p.value)
+def get_trf_model_name(predictors, attention: ATTENTION_TYPE, model: MODEL_TYPE, padded=False) -> str:
+    """
+    Format:
+        <model_type>_<predictor_name>
 
-    predictor_names = "+".join(p.value for p in predictors)
-
-    # Build name
-    name = f"{attention.value}_{predictor_names}"
-
-    if padded:
-        name += "_padded"
-
-    return name
+    Example:
+        backward_attended_envelope+envelope_onset_padded
+    """
+    return f"{model.value}_{get_attentional_predictor_name(predictors, attention, padded)}"
 
 
 
